@@ -1,0 +1,27 @@
+[workspace]
+members = ["volo-gen"]
+
+[package]
+name = "shop-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "*"
+async-graphql = { version = "*", features = ["opentelemetry", "tracing"] }
+async-graphql-poem = "*"
+async-trait = "*"
+bigdecimal = "*"
+config = { version = "*", features = ["toml"] }
+diesel = { version = "2.0.0", features = ["postgres", "extras"] }
+futures = "*"
+once_cell = "*"
+poem = "*"
+r2d2 = "*"
+redis = { version = "*", features = ["tokio-comp", "r2d2"] }
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+tokio = { version = "*", features = ["full"] }
+url = "*"
+volo = "*"
+volo-gen = { path = "./volo-gen" }

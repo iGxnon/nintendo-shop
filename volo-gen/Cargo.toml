@@ -1,0 +1,16 @@
+[package]
+name = "volo-gen"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "*"
+async-trait = "*"
+pilota = "*"
+tokio = { version = "*", features = ["full"] }
+volo = "*"
+volo-thrift = { version = "*", features = ["multiplex"] }
+
+[build-dependencies]
+volo-build = "*"
