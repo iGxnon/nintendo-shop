@@ -8,18 +8,18 @@ use async_graphql_poem::GraphQL;
 use config::{Environment, File};
 use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
+use once_cell::sync::OnceCell;
 use poem::listener::TcpListener;
 use poem::{get, Route, Server};
-use r2d2::PooledConnection;
+use r2d2::Pool;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::Duration;
 
 #[derive(Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     listen_addr: String,
-    shutdown_timeout: u64,
-    redis: String,
     pgsql: String,
 }
 
@@ -27,9 +27,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             listen_addr: "0.0.0.0:3000".to_string(),
-            shutdown_timeout: 10,
-            redis: "redis://127.0.0.1/".to_string(),
-            pgsql: "".to_string(),
+            pgsql: "postgres://postgres:postgres@localhost/shop".to_string(),
         }
     }
 }
@@ -37,8 +35,7 @@ impl Default for Config {
 #[derive(Clone)]
 pub struct Resolver {
     pub listen_addr: Register<String>,
-    pub redis: Register<&'static PooledConnection<redis::Client>>,
-    pub pgsql: Register<&'static PooledConnection<ConnectionManager<PgConnection>>>,
+    pub pgsql: Register<&'static Pool<ConnectionManager<PgConnection>>>,
 }
 
 impl BaseResolver for Resolver {
@@ -49,25 +46,34 @@ impl NamedResolver for Resolver {
     const UUID: &'static str = "sys-graphql";
 }
 
+static CONFIG: OnceCell<Config> = OnceCell::new();
+
 impl Resolver {
     pub fn new(conf: impl AsRef<Path>) -> Self {
-        let settings = config::Config::builder()
-            .add_source(File::from(conf.as_ref()))
-            .add_source(
-                Environment::with_prefix("APP")
-                    .try_parsing(true)
-                    .separator("_")
-                    .list_separator(" "),
-            )
-            .build()
-            .unwrap();
-        let config: Config = settings.try_deserialize().unwrap();
-        // Self {
-        //     listen_addr: (),
-        //     redis: (),
-        //     pgsql: (),
-        // };
-        todo!()
+        CONFIG.get_or_init(|| {
+            let settings = config::Config::builder()
+                .add_source(File::from(conf.as_ref()))
+                .add_source(
+                    Environment::with_prefix("APP")
+                        .try_parsing(true)
+                        .separator("_")
+                        .list_separator(" "),
+                )
+                .build()
+                .unwrap();
+            settings.try_deserialize().unwrap()
+        });
+        println!(
+            "{}",
+            serde_json::to_string_pretty(CONFIG.get().unwrap()).unwrap()
+        );
+        Self {
+            listen_addr: Register::once(|| CONFIG.get().unwrap().listen_addr.to_string()),
+            pgsql: Register::once_ref(|| {
+                let dsn = CONFIG.get().unwrap().pgsql.as_str();
+                Pool::new(ConnectionManager::new(dsn)).unwrap()
+            }),
+        }
     }
 
     fn schema(&self) -> Schema<Query, EmptyMutation, EmptySubscription> {

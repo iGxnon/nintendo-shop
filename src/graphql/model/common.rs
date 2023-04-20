@@ -1,13 +1,45 @@
 use async_graphql::*;
 use bigdecimal::BigDecimal;
 use std::cmp::Ordering;
+use std::fmt::{Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::str::FromStr;
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
 pub enum CurrencyCode {
     USD,
     CNY,
+}
+
+impl From<volo_gen::common::v1::CurrencyCode> for CurrencyCode {
+    fn from(value: volo_gen::common::v1::CurrencyCode) -> Self {
+        match value {
+            volo_gen::common::v1::CurrencyCode::Usd => CurrencyCode::USD,
+            volo_gen::common::v1::CurrencyCode::Cny => CurrencyCode::CNY,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ParseCurrencyCodeErr;
+
+impl Display for ParseCurrencyCodeErr {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ParseCurrencyCodeErr")
+    }
+}
+
+impl FromStr for CurrencyCode {
+    type Err = ParseCurrencyCodeErr;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match &*s.to_uppercase() {
+            "USD" => Ok(CurrencyCode::USD),
+            "CNY" => Ok(CurrencyCode::CNY),
+            _ => Err(ParseCurrencyCodeErr),
+        }
+    }
 }
 
 #[derive(Clone)]

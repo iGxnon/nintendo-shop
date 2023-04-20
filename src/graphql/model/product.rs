@@ -7,7 +7,7 @@ pub struct ProductVariant {
     pub id: Id<ProductVariant>,
     pub price: Money,
     pub title: String,
-    pub inventory_count: i64,
+    pub inventory_count: i32,
 }
 
 pub struct Product {
@@ -43,7 +43,7 @@ impl ProductVariant {
         self.inventory_count > 0
     }
 
-    async fn inventory_count(&self) -> i64 {
+    async fn inventory_count(&self) -> i32 {
         self.inventory_count
     }
 }

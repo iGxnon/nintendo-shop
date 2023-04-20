@@ -10,6 +10,12 @@ use std::str::FromStr;
 // make sure Id<Product>(1) != Id<Cart>(1)
 pub struct Id<T>(i64, PhantomData<T>);
 
+impl<T> Id<T> {
+    pub fn raw(&self) -> i64 {
+        self.0
+    }
+}
+
 impl<T> Debug for Id<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.0, f)
