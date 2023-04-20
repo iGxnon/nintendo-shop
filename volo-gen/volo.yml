@@ -5,3 +5,5 @@ entries:
     idls:
     - source: local
       path: ../idl/product.thrift
+    - source: local
+      path: ../idl/cart.thrift
