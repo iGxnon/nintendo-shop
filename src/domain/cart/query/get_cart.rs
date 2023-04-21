@@ -87,7 +87,7 @@ fn execute(req: GetCartReq, conn: &mut PgConnection) -> Result<GetCartRes> {
         .map(|v| CartEntry {
             id: v.id,
             quantity: v.quantity,
-            product: products.remove(&v.pid).unwrap(),  // instead of clone, using remove to take ownership
+            product: products.remove(&v.pid).unwrap(), // instead of clone, using remove to take ownership
             variants_idx: v.variant,
         })
         .collect::<Vec<_>>();

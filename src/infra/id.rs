@@ -1,3 +1,4 @@
+/// Numeric ID related to a specified type
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::fmt;

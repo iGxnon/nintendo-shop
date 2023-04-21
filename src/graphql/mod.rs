@@ -43,7 +43,7 @@ impl BaseResolver for Resolver {
 }
 
 impl NamedResolver for Resolver {
-    const UUID: &'static str = "sys-graphql";
+    const UID: &'static str = "sys-graphql";
 }
 
 static CONFIG: OnceCell<Config> = OnceCell::new();

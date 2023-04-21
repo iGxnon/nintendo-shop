@@ -15,6 +15,7 @@ bigdecimal = "*"
 config = { version = "*", features = ["toml"] }
 diesel = { version = "*", features = ["postgres", "extras"] }
 futures = "*"
+http = "*"
 once_cell = "*"
 poem = "*"
 r2d2 = "*"
@@ -22,6 +23,8 @@ redis = { version = "*", features = ["tokio-comp", "r2d2"] }
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 tokio = { version = "*", features = ["full"] }
+tonic = "*"
+tracing = "*"
 url = "*"
 volo = "*"
 volo-gen = { path = "./volo-gen" }
