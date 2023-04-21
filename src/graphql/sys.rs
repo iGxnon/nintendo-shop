@@ -6,4 +6,3 @@ use poem::*;
 pub async fn graphiql() -> impl IntoResponse {
     Html(GraphiQLSource::build().endpoint("/").finish())
 }
-

@@ -4,7 +4,7 @@ use diesel::prelude::*;
 
 #[derive(Queryable, Selectable, Identifiable, Debug)]
 #[diesel(table_name = t_products)]
-pub struct Product {
+pub struct QueryProduct {
     pub id: i64,
     pub title: String,
     pub sub_title: String,
@@ -31,9 +31,9 @@ pub struct MutateProduct<'a> {
 }
 
 #[derive(Queryable, Selectable, Associations, Identifiable, Debug)]
-#[diesel(belongs_to(Product, foreign_key = pid))]
+#[diesel(belongs_to(QueryProduct, foreign_key = pid))]
 #[diesel(table_name = t_product_images)]
-pub struct ProductImage {
+pub struct QueryProductImage {
     pub id: i64,
     pub pid: i64,
     pub url: String,
@@ -41,9 +41,9 @@ pub struct ProductImage {
 }
 
 #[derive(Queryable, Selectable, Associations, Identifiable, Debug)]
-#[diesel(belongs_to(Product, foreign_key = pid))]
+#[diesel(belongs_to(QueryProduct, foreign_key = pid))]
 #[diesel(table_name = t_product_variants)]
-pub struct ProductVariant {
+pub struct QueryProductVariant {
     pub id: i64,
     pub pid: i64,
     pub price: PgMoney,

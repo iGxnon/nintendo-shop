@@ -12,20 +12,20 @@ use volo_gen::common::v1::{CurrencyCode, Image, Money};
 use volo_gen::product::v1::{GetProductReq, GetProductRes, Product, ProductVariant};
 
 fn execute(req: GetProductReq, conn: &mut PgConnection) -> Result<GetProductRes> {
-    let product: model::Product = t_products::table
+    let product: model::QueryProduct = t_products::table
         .find(req.id)
-        .select(model::Product::as_select())
+        .select(model::QueryProduct::as_select())
         .get_result(conn)?;
     let currency_code = match &*product.currency_code.to_uppercase() {
         "USD" => CurrencyCode::Usd,
         "CNY" => CurrencyCode::Cny,
         _ => return Err(anyhow!("error parsing currency_code")),
     };
-    let images = model::ProductImage::belonging_to(&product)
-        .select(model::ProductImage::as_select())
+    let images = model::QueryProductImage::belonging_to(&product)
+        .select(model::QueryProductImage::as_select())
         .load(conn)?;
-    let variants = model::ProductVariant::belonging_to(&product)
-        .select(model::ProductVariant::as_select())
+    let variants = model::QueryProductVariant::belonging_to(&product)
+        .select(model::QueryProductVariant::as_select())
         .load(conn)?;
     Ok(GetProductRes {
         product: Some(Product {
