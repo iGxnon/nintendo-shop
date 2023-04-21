@@ -1,8 +1,3 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::ops::DerefMut;
-use std::ops::Div;
-
 use crate::domain::cart::model;
 use crate::graphql::Resolver;
 use crate::infra::mqsrs::Query;
@@ -14,6 +9,10 @@ use bigdecimal::BigDecimal;
 use diesel::data_types::PgMoney;
 use diesel::sql_types::*;
 use diesel::{PgConnection, QueryDsl, QueryableByName, RunQueryDsl, SelectableHelper};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::ops::DerefMut;
+use std::ops::Div;
 use volo_gen::cart::v1::{Cart, CartEntry, GetCartReq, GetCartRes};
 use volo_gen::common::v1::{CurrencyCode, Image};
 use volo_gen::product::v1::{Product, ProductVariant};
@@ -169,6 +168,10 @@ fn execute(req: GetCartReq, conn: &mut PgConnection) -> Result<GetCartRes> {
             entries: entries.into_values().collect(),
         }),
     })
+}
+
+fn execute2(req: GetCartReq, conn: &mut PgConnection) {
+    // todo
 }
 
 #[test]
