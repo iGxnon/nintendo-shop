@@ -1,2 +1,2 @@
 pub mod product;
-mod cart;
+pub mod cart;

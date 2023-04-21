@@ -11,7 +11,7 @@ use std::ops::{DerefMut, Div};
 use volo_gen::common::v1::{CurrencyCode, Image, Money};
 use volo_gen::product::v1::{GetProductReq, GetProductRes, Product, ProductVariant};
 
-pub fn execute(req: GetProductReq, conn: &mut PgConnection) -> Result<GetProductRes> {
+fn execute(req: GetProductReq, conn: &mut PgConnection) -> Result<GetProductRes> {
     let product: model::Product = t_products::table
         .find(req.id)
         .select(model::Product::as_select())
