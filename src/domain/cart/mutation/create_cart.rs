@@ -1,5 +1,3 @@
-use std::ops::DerefMut;
-
 use crate::{
     graphql::Resolver,
     infra::{mqsrs::Mutation, resolver::BaseResolver},
@@ -7,6 +5,7 @@ use crate::{
 };
 use anyhow::Result;
 use diesel::{data_types::PgTimestamp, PgConnection, RunQueryDsl};
+use std::ops::DerefMut;
 use volo_gen::cart::v1::{Cart, CreateCartReq, CreateCartRes};
 
 fn execute(_: CreateCartReq, conn: &mut PgConnection) -> Result<CreateCartRes> {

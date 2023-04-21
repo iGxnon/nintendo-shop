@@ -2,7 +2,7 @@ mod cart;
 mod common;
 mod product;
 
-use crate::graphql::model::cart::{Cart, CartEntry};
+use crate::graphql::model::cart::{Cart, CartEntry, CreateCart};
 use crate::graphql::model::common::{Image, Money};
 use crate::graphql::model::product::{Product, ProductVariant};
 use crate::graphql::Resolver;
@@ -32,7 +32,7 @@ impl Query {
                     .images
                     .into_iter()
                     .map(|v| Image {
-                        url: v.url.parse().unwrap(),
+                        url: v.url.into_string(),
                         alt_text: v.alt_text.into_string(),
                     })
                     .collect(),
@@ -79,7 +79,7 @@ impl Query {
                                 .images
                                 .into_iter()
                                 .map(|i| Image {
-                                    url: i.url.parse().unwrap(),
+                                    url: i.url.into_string(),
                                     alt_text: i.alt_text.into_string(),
                                 })
                                 .collect(),
@@ -108,13 +108,15 @@ impl Query {
 
 #[Object]
 impl Mutation {
-    async fn create_cart<'ctx>(&self, cx: &Context<'ctx>) -> Result<Cart> {
+    async fn create_cart<'ctx>(&self, cx: &Context<'ctx>) -> Result<CreateCart> {
         let resolver = cx.data::<Resolver>()?;
         let mutation = resolver.create_cart();
         let res = mqsrs::Mutation::execute(mutation, CreateCartReq {}).await?;
-        Ok(Cart {
-            id: res.cart.id.into(),
-            entries: vec![],
+        Ok(CreateCart {
+            cart: Cart {
+                id: res.cart.id.into(),
+                entries: vec![],
+            },
         })
     }
 

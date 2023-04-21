@@ -10,7 +10,8 @@ use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
 use once_cell::sync::OnceCell;
 use poem::listener::TcpListener;
-use poem::{get, Route, Server};
+use poem::middleware::Cors;
+use poem::{get, EndpointExt, Route, Server};
 use r2d2::Pool;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -95,7 +96,7 @@ impl Resolver {
     pub async fn serve(&self) {
         Server::new(TcpListener::bind(self.resolve(&self.listen_addr)))
             .run_with_graceful_shutdown(
-                self.make_service(),
+                self.make_service().with(Cors::new()),
                 async {
                     let _ = tokio::signal::ctrl_c().await;
                 },

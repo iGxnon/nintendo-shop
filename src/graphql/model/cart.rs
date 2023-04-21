@@ -10,6 +10,11 @@ pub struct Cart {
     pub entries: Vec<CartEntry>,
 }
 
+#[derive(SimpleObject)]
+pub struct CreateCart {
+    pub cart: Cart,
+}
+
 pub struct CartEntry {
     pub id: Id<CartEntry>,
     pub quantity: i32,

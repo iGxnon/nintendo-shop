@@ -111,7 +111,7 @@ comment on column t_cart_entries.id is 'pk';
 
 comment on column t_cart_entries.cid is 'fk to t_carts';
 
-comment on column t_cart_entries.pid is 'fk to t_product';
+comment on column t_cart_entries.pid is 'fk to t_products';
 
 comment on column t_cart_entries.quantity is 'the quantity of this item';
 

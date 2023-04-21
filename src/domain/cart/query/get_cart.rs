@@ -4,11 +4,12 @@ use crate::graphql::Resolver;
 use crate::infra::mqsrs::Query;
 use crate::infra::resolver::BaseResolver;
 use crate::schema::t_cart_entries;
+use crate::schema::t_carts;
 use crate::schema::t_products;
 use anyhow::Result;
 use bigdecimal::BigDecimal;
 use diesel::{
-    BelongingToDsl, ExpressionMethods, GroupedBy, PgConnection, QueryDsl, RunQueryDsl,
+    BelongingToDsl, ExpressionMethods, GroupedBy, PgConnection, QueryDsl, QueryResult, RunQueryDsl,
     SelectableHelper,
 };
 use std::collections::HashMap;
@@ -19,9 +20,17 @@ use volo_gen::common::v1::{CurrencyCode, Image};
 use volo_gen::product::v1::{Product, ProductVariant};
 
 fn execute(req: GetCartReq, conn: &mut PgConnection) -> Result<GetCartRes> {
+    let cart = match t_carts::table
+        .find(req.id)
+        .select(QueryCart::as_select())
+        .get_result(conn)
+    {
+        Ok(cart) => cart,
+        Err(_) => return Ok(GetCartRes { cart: None }),
+    };
     let entries: Vec<QueryCartEntry> = t_cart_entries::table
         .select(QueryCartEntry::as_select())
-        .filter(t_cart_entries::cid.eq(req.id))
+        .filter(t_cart_entries::cid.eq(cart.id))
         .load(conn)?;
     let pids: Vec<i64> = entries.iter().map(|v| v.pid).collect();
     let products: Vec<QueryProduct> = t_products::table

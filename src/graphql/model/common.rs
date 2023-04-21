@@ -133,7 +133,7 @@ impl Money {
 }
 
 pub struct Image {
-    pub url: url::Url,
+    pub url: String,
     pub alt_text: String,
 }
 
