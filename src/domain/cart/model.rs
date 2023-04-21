@@ -2,7 +2,7 @@ use crate::domain::product::model::Product;
 use crate::schema::{t_cart_entries, t_carts};
 use diesel::prelude::*;
 
-#[derive(Queryable, Insertable, Selectable, Identifiable, Debug)]
+#[derive(Queryable, Selectable, Identifiable, Debug)]
 #[diesel(table_name = t_carts)]
 pub struct Cart {
     pub id: i64,

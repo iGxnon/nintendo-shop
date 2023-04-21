@@ -12,7 +12,7 @@ pub struct Cart {
 
 pub struct CartEntry {
     pub id: Id<CartEntry>,
-    pub quantity: i64,
+    pub quantity: i32,
     pub product: Product,
     pub variants_idx: usize, // the selected variant in product, default 0
 }
@@ -55,7 +55,7 @@ impl CartEntry {
         self.id.to_string()
     }
 
-    async fn quantity(&self) -> i64 {
+    async fn quantity(&self) -> i32 {
         self.quantity
     }
 

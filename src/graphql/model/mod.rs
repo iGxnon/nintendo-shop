@@ -3,13 +3,13 @@ mod common;
 mod product;
 
 use crate::graphql::model::cart::{Cart, CartEntry};
-use crate::graphql::model::common::{CurrencyCode, Image, Money};
+use crate::graphql::model::common::{Image, Money};
 use crate::graphql::model::product::{Product, ProductVariant};
 use crate::graphql::Resolver;
 use crate::infra::id::Id;
 use crate::infra::mqsrs;
 use async_graphql::*;
-use bigdecimal::BigDecimal;
+use volo_gen::cart::v1::{CreateCartReq, GetCartReq};
 use volo_gen::product::v1::GetProductReq;
 
 pub struct Query;
@@ -54,30 +54,79 @@ impl Query {
         Ok(None)
     }
 
-    async fn cart(&self, id: String) -> Option<Cart> {
-        Some(Cart {
-            id: 1.into(),
-            entries: vec![CartEntry {
-                id: 2.into(),
-                quantity: 3,
-                product: Product {
-                    id: 4.into(),
-                    title: "Mr. DZ".to_string(),
-                    sub_title: "Yan".to_string(),
-                    description: "Smoke".to_string(),
-                    images: vec![],
-                    variants: vec![ProductVariant {
-                        id: 9.into(),
-                        price: Money {
-                            amount: BigDecimal::from(10),
-                            currency_code: CurrencyCode::USD,
+    async fn cart<'ctx>(&self, cx: &Context<'ctx>, id: String) -> Result<Option<Cart>> {
+        let id: Id<Cart> = id.parse()?;
+        let resolver = cx.data::<Resolver>()?;
+        let query = resolver.create_get_cart();
+        let res = mqsrs::Query::execute(&query, GetCartReq { id: id.raw() }).await?;
+        if let Some(cart) = res.cart {
+            return Ok(Some(Cart {
+                id: cart.id.into(),
+                entries: cart
+                    .entries
+                    .into_iter()
+                    .map(|v| CartEntry {
+                        id: v.id.into(),
+                        quantity: v.quantity,
+                        variants_idx: v.variants_idx as usize,
+                        product: Product {
+                            id: v.product.id.into(),
+                            title: v.product.title.into_string(),
+                            sub_title: v.product.sub_title.into_string(),
+                            description: v.product.description.into_string(),
+                            images: v
+                                .product
+                                .images
+                                .into_iter()
+                                .map(|i| Image {
+                                    url: i.url.parse().unwrap(),
+                                    alt_text: i.alt_text.into_string(),
+                                })
+                                .collect(),
+                            variants: v
+                                .product
+                                .variants
+                                .into_iter()
+                                .map(|a| ProductVariant {
+                                    id: a.id.into(),
+                                    price: Money {
+                                        amount: a.price.amount.parse().unwrap(),
+                                        currency_code: v.product.currency_code.into(),
+                                    },
+                                    title: a.title.into_string(),
+                                    inventory_count: a.inventory_count,
+                                })
+                                .collect(),
                         },
-                        title: "xl".to_string(),
-                        inventory_count: 0,
-                    }],
-                },
-                variants_idx: 0,
-            }],
+                    })
+                    .collect(),
+            }));
+        }
+        Ok(None)
+    }
+}
+
+#[Object]
+impl Mutation {
+    async fn create_cart<'ctx>(&self, cx: &Context<'ctx>) -> Result<Cart> {
+        let resolver = cx.data::<Resolver>()?;
+        let mutation = resolver.create_cart();
+        let res = mqsrs::Mutation::execute(mutation, CreateCartReq {}).await?;
+        Ok(Cart {
+            id: res.cart.id.into(),
+            entries: vec![],
         })
+    }
+
+    async fn add_item_to_cart<'ctx>(&self, cx: &Context<'ctx>) -> Result<bool> {
+        todo!()
+    }
+
+    async fn get_or_init_checkout<'ctx>(&self, cx: &Context<'ctx>) -> Result<bool> {
+        todo!()
+    }
+
+    async fn checkout<'ctx>(&self, cx: &Context<'ctx>) -> Result<bool> {
+        todo!()
     }
 }

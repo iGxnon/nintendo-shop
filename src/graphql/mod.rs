@@ -76,8 +76,8 @@ impl Resolver {
         }
     }
 
-    fn schema(&self) -> Schema<Query, EmptyMutation, EmptySubscription> {
-        Schema::build(Query, EmptyMutation, EmptySubscription)
+    fn schema(&self) -> Schema<Query, Mutation, EmptySubscription> {
+        Schema::build(Query, Mutation, EmptySubscription)
             .data(self.clone())
             .extension(extensions::Analyzer)
             .extension(extensions::Tracing)

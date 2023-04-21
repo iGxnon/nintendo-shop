@@ -61,7 +61,7 @@ fn execute(req: GetProductReq, conn: &mut PgConnection) -> Result<GetProductRes>
 
 impl RpcResolver {
     pub fn create_get_product(&self) -> impl Query<GetProductReq, Result<GetProductRes>> + '_ {
-        move |req: GetProductReq| async { todo!() }
+        move |_: GetProductReq| async { todo!() }
     }
 }
 

@@ -22,7 +22,14 @@ struct GetCartRes {
     1: optional Cart cart;
 }
 
+struct CreateCartReq {}
+
+struct CreateCartRes {
+    1: required Cart cart;
+}
+
 service CartService {
     void ping();
     GetCartRes getCart(1: GetCartReq req);
+    CreateCartRes createCart(1: CreateCartReq req);
 }
