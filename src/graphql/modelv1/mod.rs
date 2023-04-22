@@ -267,6 +267,44 @@ impl Mutation {
         })
     }
 
+    async fn remove_cart_entry_with_id<'ctx>(
+        &self,
+        cx: &Context<'ctx>,
+        cart_id: String,
+        entry_id: String,
+    ) -> Result<MutationCart> {
+        let resolver = cx.data::<Resolver>()?;
+        let mut conn = resolver.pg_conn()?;
+
+        let eid: Id<CartEntry> = entry_id.parse()?;
+        let cid: Id<Cart> = cart_id.parse()?;
+
+        conn.deref_mut().transaction(|conn| {
+            let _ = t_carts::table
+                .find(cid.raw())
+                .select(QueryCart::as_select())
+                .get_result(conn)?;
+
+            let cart_entry = t_cart_entries::table
+                .find(eid.raw())
+                .select(QueryCartEntry::as_select())
+                .get_result(conn)?;
+
+            if cart_entry.quantity == 1 {
+                diesel::delete(t_cart_entries::table)
+                    .filter(t_cart_entries::id.eq(eid.raw()))
+                    .execute(conn)?;
+                return get_cart(cid, conn).map(|v| MutationCart { cart: v.unwrap() });
+            }
+
+            diesel::update(t_cart_entries::table)
+                .filter(t_cart_entries::id.eq(eid.raw()))
+                .set(t_cart_entries::quantity.eq(cart_entry.quantity - 1))
+                .execute(conn)?;
+            get_cart(cid, conn).map(|v| MutationCart { cart: v.unwrap() })
+        })
+    }
+
     async fn remove_from_cart<'ctx>(
         &self,
         cx: &Context<'ctx>,
