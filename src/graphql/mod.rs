@@ -1,7 +1,8 @@
-pub mod model;
+pub mod modelv1;
+pub mod modelv2;
 pub mod sys;
 
-use crate::graphql::model::{Mutation, Query};
+use crate::graphql::modelv1::{Mutation, Query};
 use crate::infra::resolver::*;
 use async_graphql::*;
 use async_graphql_poem::GraphQL;
@@ -12,8 +13,9 @@ use once_cell::sync::OnceCell;
 use poem::listener::TcpListener;
 use poem::middleware::Cors;
 use poem::{get, EndpointExt, Route, Server};
-use r2d2::Pool;
+use r2d2::{Pool, PooledConnection};
 use serde::{Deserialize, Serialize};
+use std::ops::DerefMut;
 use std::path::Path;
 use std::time::Duration;
 
@@ -84,6 +86,10 @@ impl Resolver {
             .extension(extensions::Tracing)
             // .extension(extensions::OpenTelemetry::new(todo!()))
             .finish()
+    }
+
+    fn pg_conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+        Ok(self.resolve(&self.pgsql).get()?)
     }
 
     fn make_service(&self) -> Route {

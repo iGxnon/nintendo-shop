@@ -26,6 +26,7 @@ diesel::table! {
         pid -> Int8,
         url -> Varchar,
         alt_text -> Varchar,
+        order_idx -> Int4,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -38,6 +39,7 @@ diesel::table! {
         price -> Money,
         title -> Varchar,
         inventory_count -> Int4,
+        order_idx -> Int4,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

@@ -12,15 +12,6 @@ pub enum CurrencyCode {
     CNY,
 }
 
-impl From<volo_gen::common::v1::CurrencyCode> for CurrencyCode {
-    fn from(value: volo_gen::common::v1::CurrencyCode) -> Self {
-        match value {
-            volo_gen::common::v1::CurrencyCode::Usd => CurrencyCode::USD,
-            volo_gen::common::v1::CurrencyCode::Cny => CurrencyCode::CNY,
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct ParseCurrencyCodeErr;
 
@@ -132,9 +123,11 @@ impl Money {
     }
 }
 
+#[derive(Clone)]
 pub struct Image {
     pub url: String,
     pub alt_text: String,
+    pub order_idx: i32,
 }
 
 #[Object]
@@ -145,5 +138,9 @@ impl Image {
 
     async fn alt_text(&self) -> String {
         self.alt_text.to_string()
+    }
+
+    async fn order_idx(&self) -> i32 {
+        self.order_idx
     }
 }

@@ -14,7 +14,7 @@ struct Product {
     2: required string title;
     3: required string subTitle = ""
     4: required string description;
-    5: required common.CurrencyCode currencyCode;
+    5: required string currencyCode;
     6: required list<common.Image> images;
     7: required list<ProductVariant> variants;
 }

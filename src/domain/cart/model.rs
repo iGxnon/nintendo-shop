@@ -19,3 +19,12 @@ pub struct QueryCartEntry {
     pub quantity: i32,
     pub variant: i32,
 }
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = t_cart_entries)]
+pub struct NewCartEntry {
+    pub cid: i64,
+    pub pid: i64,
+    pub quantity: i32,
+    pub variant: i32,
+}

@@ -1,5 +1,5 @@
-use crate::graphql::model::common::{CurrencyCode, Money};
-use crate::graphql::model::product::Product;
+use crate::graphql::modelv1::common::{CurrencyCode, Money};
+use crate::graphql::modelv1::product::Product;
 use crate::infra::id::Id;
 use async_graphql::*;
 use bigdecimal::BigDecimal;
@@ -11,7 +11,7 @@ pub struct Cart {
 }
 
 #[derive(SimpleObject)]
-pub struct CreateCart {
+pub struct MutationCart {
     pub cart: Cart,
 }
 
@@ -19,7 +19,7 @@ pub struct CartEntry {
     pub id: Id<CartEntry>,
     pub quantity: i32,
     pub product: Product,
-    pub variants_idx: usize, // the selected variant in product, default 0
+    pub variant_at: i32, // the selected variant in product, default 0
 }
 
 #[Object]
@@ -45,7 +45,7 @@ impl CartEntry {
                 currency_code: CurrencyCode::USD,
             };
         }
-        let price = &self.product.variants[self.variants_idx].price;
+        let price = &self.product.variants[self.variant_at as usize].price;
         let total = price.amount.clone().mul(BigDecimal::from(self.quantity));
         Money {
             amount: total,
@@ -70,5 +70,9 @@ impl CartEntry {
 
     async fn total_amount(&self) -> Money {
         self.calculate_amount()
+    }
+
+    async fn variant_at(&self) -> i32 {
+        self.variant_at
     }
 }

@@ -32,14 +32,17 @@ create table t_product_variants
     pid             bigint                  not null
         constraint t_product_variants_t_products_id_fk
             references t_products,
-    price           money     default 0.00  not null,
+    price           money     default 0     not null,
     title           varchar   default ''    not null,
-    inventory_count integer   default 0     not null,
+    inventory_count int4      default 0     not null,
+    order_idx       int4      default 0     not null,
     created_at      timestamp default now() not null,
     updated_at      timestamp default now() not null
 );
 
-comment on table t_product_variants is 'product variants';
+create index t_product_variants_pid_index on t_product_variants (pid);
+
+comment on table t_product_variants is 'product variants table';
 
 comment on column t_product_variants.id is 'pk';
 
@@ -49,7 +52,9 @@ comment on column t_product_variants.price is 'price number, money type decimal(
 
 comment on column t_product_variants.title is 'title of this variant';
 
-comment on column t_product_variants.inventory_count is 'count';
+comment on column t_product_variants.inventory_count is 'inventory count';
+
+comment on column t_product_variants.order_idx is 'the index in variants of a product';
 
 create table t_product_images
 (
@@ -61,9 +66,12 @@ create table t_product_images
             references t_products,
     url        varchar   default ''    not null,
     alt_text   varchar   default ''    not null,
+    order_idx  int4      default 0     not null,
     created_at timestamp default now() not null,
     updated_at timestamp default now() not null
 );
+
+create index t_product_images_pid_index on t_product_images (pid);
 
 comment on table t_product_images is 'images';
 
@@ -75,6 +83,8 @@ comment on column t_product_images.url is 'image url';
 
 comment on column t_product_images.alt_text is 'altText of image';
 
+comment on column t_product_images.order_idx is 'the index in images of a product, 0 is the feature image';
+
 create table t_carts
 (
     id         bigserial               not null
@@ -84,7 +94,7 @@ create table t_carts
     updated_at timestamp default now() not null
 );
 
-comment on table t_carts is 'cart hold by a user';
+comment on table t_carts is 'a cart for a client';
 
 comment on column t_carts.id is 'pk';
 
@@ -99,13 +109,17 @@ create table t_cart_entries
     pid        bigint                  not null
         constraint t_cart_entries_t_products_id_fk
             references t_products,
-    quantity   integer   default 0     not null,
+    quantity   integer   default 1     not null,
     variant    integer   default 0     not null,
     created_at timestamp default now() not null,
     updated_at timestamp default now() not null
 );
 
-comment on table t_cart_entries is 'cart entries';
+create index t_cart_entries_cid_index on t_cart_entries (cid);
+
+create index t_cart_entries_pid_index on t_cart_entries (pid);
+
+comment on table t_cart_entries is 'cart entries for every variant of products';
 
 comment on column t_cart_entries.id is 'pk';
 

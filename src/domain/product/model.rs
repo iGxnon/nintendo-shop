@@ -38,6 +38,7 @@ pub struct QueryProductImage {
     pub pid: i64,
     pub url: String,
     pub alt_text: String,
+    pub order_idx: i32,
 }
 
 #[derive(Queryable, Selectable, Associations, Identifiable, Debug)]
@@ -49,4 +50,5 @@ pub struct QueryProductVariant {
     pub price: PgMoney,
     pub title: String,
     pub inventory_count: i32,
+    pub order_idx: i32,
 }
