@@ -2,6 +2,7 @@ import os
 import time
 import urllib.request
 from bs4 import BeautifulSoup
+from collections import namedtuple
 import requests
 import requests.utils
 import consts
@@ -59,12 +60,18 @@ class Parser:
         soup = BeautifulSoup(html)
         products_div = soup.find(role="main").find_all("div")
         products = []
+        Product = namedtuple("Product", ["name", "price", "img_alt_text", "img_url", "detail_url"])
         for div in products_div:
             try:
-                products.append((div.span.text, div.img["alt"], "https:" + div.img["src"]))
+                product = Product(div.a.text, div.span.text, div.img["alt"], "https:" + div.img["src"],
+                                  "https://superraregames.com" + div.a["href"])
+                products.append(product)
             except Exception:
                 continue
         return products
+
+    def parse_product_page(self, product):
+        pass
 
 
 class Resolver:
@@ -80,8 +87,8 @@ class Resolver:
         os.makedirs(path)
         for product in products:
             try:
-                urllib.request.urlretrieve(product[2],
-                                           filename=(path + product[1] + "_" + product[0] + ".png").replace(" ", "_"))
+                urllib.request.urlretrieve(product.img_url,
+                                           filename=(path + product.name + ".png"))
             except Exception:
                 continue
 

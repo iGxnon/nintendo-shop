@@ -2,3 +2,6 @@
 .vscode
 .idea
 .env
+venv
+images
+__pycache__
