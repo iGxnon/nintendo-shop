@@ -1,7 +1,9 @@
-use crate::graphql::modelv1::common::{CurrencyCode, Image, Money};
+use crate::graphql::model::common::{CurrencyCode, Image, Money};
+use crate::infra::error::Status;
 use crate::infra::id::Id;
 use async_graphql::*;
 use bigdecimal::BigDecimal;
+use std::ops::Div;
 
 #[derive(Clone)]
 pub struct ProductVariant {
@@ -115,5 +117,43 @@ impl Product {
             max_variant_price: self.variants[max_at].price.clone(),
             min_variant_price: self.variants[min_at].price.clone(),
         }
+    }
+}
+
+impl TryFrom<volo_gen::product::v1::Product> for Product {
+    type Error = Status;
+
+    fn try_from(value: volo_gen::product::v1::Product) -> std::result::Result<Self, Self::Error> {
+        Ok(Self {
+            id: value.id.into(),
+            title: value.title.into_string(),
+            sub_title: value.sub_title.into_string(),
+            description: value.description.into_string(),
+            images: value
+                .images
+                .into_iter()
+                .map(|v| Image {
+                    url: v.url.into_string(),
+                    alt_text: v.alt_text.into_string(),
+                    order_idx: v.order_idx,
+                })
+                .collect(),
+            variants: value
+                .variants
+                .into_iter()
+                .map(|v| {
+                    Ok(ProductVariant {
+                        id: v.id.into(),
+                        price: Money {
+                            amount: BigDecimal::from(v.price.amount).div(100), // todo compat with currency_code
+                            currency_code: v.price.currency_code.parse()?,
+                        },
+                        title: v.title.into_string(),
+                        inventory_count: v.inventory_count,
+                        order_idx: v.order_idx,
+                    })
+                })
+                .collect::<Result<Vec<_>, Status>>()?,
+        })
     }
 }

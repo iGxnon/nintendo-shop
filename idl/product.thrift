@@ -7,27 +7,27 @@ struct ProductVariant {
     2: required common.Money price;
     3: required string title;
     4: required i32 inventory_count;
+    5: required i32 order_idx = 0;
 }
 
 struct Product {
     1: required i64 id;
     2: required string title;
-    3: required string subTitle = ""
+    3: required string sub_title = ""
     4: required string description;
-    5: required string currencyCode;
+    5: required string currency_code;
     6: required list<common.Image> images;
     7: required list<ProductVariant> variants;
 }
 
-struct GetProductReq {
-    1: required i64 id;
-}
-
-struct GetProductRes {
-    1: optional Product product;
+struct ProductConnection {
+    1: required list<Product> products;
+    2: required bool hasPreviousPage;
+    3: required bool hasNextPage;
 }
 
 service ProductService {
     void ping();  // used for health check
-    GetProductRes getProduct(1: GetProductReq req);
+    Product getProductById(1: i64 id);
+    ProductConnection listProducts(1: common.PaginationOption params);
 }

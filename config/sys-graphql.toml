@@ -1,3 +1,14 @@
 listen_addr = '0.0.0.0:3000'
 redis = 'redis://127.0.0.1/'
 pgsql = 'postgres://postgres:postgres@localhost/shop'
+
+# Whether to enable the monolith service
+[monolith]
+enable = true
+pgsql = 'postgres://postgres:postgres@localhost/shop'
+redis = 'redis://127.0.0.1/'
+
+# Whether to enable the micro service
+[micro]
+enable = false
+rpc = ""  # ip:port

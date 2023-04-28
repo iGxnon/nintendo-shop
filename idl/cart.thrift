@@ -9,27 +9,13 @@ struct Cart {
 
 struct CartEntry {
     1: required i64 id;
-    2: required i32 quantity;
-    3: required product.Product product;
-    4: required i32 variants_idx;
-}
-
-struct GetCartReq {
-    1: required i64 id;
-}
-
-struct GetCartRes {
-    1: optional Cart cart;
-}
-
-struct CreateCartReq {}
-
-struct CreateCartRes {
-    1: required Cart cart;
+    2: required product.Product product;
+    3: required i32 quantity;
+    4: required i32 variants;
 }
 
 service CartService {
     void ping();
-    GetCartRes getCart(1: GetCartReq req);
-    CreateCartRes createCart(1: CreateCartReq req);
+    Cart getCart(1: i64 id);
+    i64 createCart();
 }

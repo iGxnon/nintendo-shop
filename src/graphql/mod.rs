@@ -1,10 +1,10 @@
-pub mod modelv1;
-pub mod modelv2;
+pub mod model;
 pub mod sys;
 
-use crate::graphql::modelv1::{Mutation, Query};
+use crate::graphql::model::{GraphqlMutation, GraphqlQuery};
+use crate::infra::error::Result;
 use crate::infra::resolver::*;
-use async_graphql::*;
+use async_graphql::{extensions, EmptySubscription, Schema};
 use async_graphql_poem::GraphQL;
 use config::{Environment, File};
 use diesel::r2d2::ConnectionManager;
@@ -15,15 +15,14 @@ use poem::middleware::Cors;
 use poem::{get, EndpointExt, Route, Server};
 use r2d2::{Pool, PooledConnection};
 use serde::{Deserialize, Serialize};
-use std::ops::DerefMut;
 use std::path::Path;
-use std::time::Duration;
 
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
     listen_addr: String,
     pgsql: String,
+    redis: String,
 }
 
 impl Default for Config {
@@ -31,6 +30,7 @@ impl Default for Config {
         Self {
             listen_addr: "0.0.0.0:3000".to_string(),
             pgsql: "postgres://postgres:postgres@localhost/shop".to_string(),
+            redis: "redis://redis/".to_string(),
         }
     }
 }
@@ -39,6 +39,7 @@ impl Default for Config {
 pub struct Resolver {
     pub listen_addr: Register<String>,
     pub pgsql: Register<&'static Pool<ConnectionManager<PgConnection>>>,
+    pub redis: Register<&'static Pool<redis::Client>>,
 }
 
 impl BaseResolver for Resolver {
@@ -76,20 +77,28 @@ impl Resolver {
                 let dsn = CONFIG.get().unwrap().pgsql.as_str();
                 Pool::new(ConnectionManager::new(dsn)).unwrap()
             }),
+            redis: Register::once_ref(|| {
+                let dsn = CONFIG.get().unwrap().redis.as_str();
+                Pool::new(redis::Client::open(dsn).unwrap()).unwrap()
+            }),
         }
     }
 
-    fn schema(&self) -> Schema<Query, Mutation, EmptySubscription> {
-        Schema::build(Query, Mutation, EmptySubscription)
+    pub fn pg_conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
+        Ok(self.resolve(&self.pgsql).get()?)
+    }
+
+    pub fn redis_conn(&self) -> Result<PooledConnection<redis::Client>> {
+        Ok(self.resolve(&self.redis).get()?)
+    }
+
+    fn schema(&self) -> Schema<GraphqlQuery, GraphqlMutation, EmptySubscription> {
+        Schema::build(GraphqlQuery, GraphqlMutation, EmptySubscription)
             .data(self.clone())
             .extension(extensions::Analyzer)
             .extension(extensions::Tracing)
             // .extension(extensions::OpenTelemetry::new(todo!()))
             .finish()
-    }
-
-    fn pg_conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>> {
-        Ok(self.resolve(&self.pgsql).get()?)
     }
 
     fn make_service(&self) -> Route {
@@ -101,13 +110,7 @@ impl Resolver {
 
     pub async fn serve(&self) {
         Server::new(TcpListener::bind(self.resolve(&self.listen_addr)))
-            .run_with_graceful_shutdown(
-                self.make_service().with(Cors::new()),
-                async {
-                    let _ = tokio::signal::ctrl_c().await;
-                },
-                Some(Duration::from_secs(10)),
-            )
+            .run(self.make_service().with(Cors::new()))
             .await
             .unwrap();
     }

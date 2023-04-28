@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Error as AnyError};
 use http::StatusCode;
 use serde::{Deserialize, Serialize};
+use std::any::TypeId;
 use std::backtrace::Backtrace;
 use std::collections::HashMap;
 use std::error::Error as StdError;
@@ -22,6 +23,10 @@ pub struct Status {
 }
 
 impl Status {
+    pub fn code(&self) -> Code {
+        self.code
+    }
+
     pub fn new(
         code: Code,
         message: String,
@@ -312,6 +317,8 @@ impl Status {
 pub enum Range<T> {
     Discrete(Vec<T>),
     Continuous(T, T),
+    EndAt(T),
+    StartAt(T),
 }
 
 impl<T: Debug> ToString for Range<T> {
@@ -319,6 +326,8 @@ impl<T: Debug> ToString for Range<T> {
         match self {
             Range::Discrete(v) => format!("{:?}", v),
             Range::Continuous(low, high) => format!("[{:?}, {:?}]", low, high),
+            Range::EndAt(v) => format!("[..., {:?}]", v),
+            Range::StartAt(v) => format!("[{:?}, ...]", v),
         }
     }
 }
@@ -475,6 +484,24 @@ where
     E: StdError + Send + Sync + 'static,
 {
     fn from(err: E) -> Self {
+        // TODO #[cfg(diesel)]
+        if TypeId::of::<E>() == TypeId::of::<diesel::result::Error>() {
+            return Self {
+                code: Code::Internal,
+                message: "Internal error.".to_string(),
+                details: None,
+                inner: Some(Arc::new(anyhow!("diesel database error: {}", err))),
+            };
+        }
+        // TODO #[cfg(redis)]
+        if TypeId::of::<E>() == TypeId::of::<redis::RedisError>() {
+            return Self {
+                code: Code::Internal,
+                message: "Internal error.".to_string(),
+                details: None,
+                inner: Some(Arc::new(anyhow!("redis database error: {}", err))),
+            };
+        }
         Self {
             code: Code::Unknown, // The indication of an error from any source is unknown.
             message: "Unknown error.".to_string(),

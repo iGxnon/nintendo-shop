@@ -23,7 +23,6 @@ redis = { version = "*", features = ["tokio-comp", "r2d2"] }
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 tokio = { version = "*", features = ["full"] }
-tonic = "*"
 tracing = "*"
 url = "*"
 volo = "*"

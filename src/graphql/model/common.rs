@@ -1,3 +1,4 @@
+use crate::infra::error::Status;
 use async_graphql::*;
 use bigdecimal::BigDecimal;
 use std::cmp::Ordering;
@@ -12,23 +13,15 @@ pub enum CurrencyCode {
     CNY,
 }
 
-#[derive(Debug)]
-pub struct ParseCurrencyCodeErr;
-
-impl Display for ParseCurrencyCodeErr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ParseCurrencyCodeErr")
-    }
-}
-
 impl FromStr for CurrencyCode {
-    type Err = ParseCurrencyCodeErr;
+    type Err = Status;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match &*s.to_uppercase() {
             "USD" => Ok(CurrencyCode::USD),
             "CNY" => Ok(CurrencyCode::CNY),
-            _ => Err(ParseCurrencyCodeErr),
+            _ => Err(Status::internal()
+                .with_debug_info(false, format!("Cannot parse currency code: {}", s))),
         }
     }
 }
