@@ -119,8 +119,10 @@ impl CartDomain {
                 .filter(t_cart_entries::id.eq(entry.id))
                 .set(t_cart_entries::quantity.eq(entry.quantity + 1))
                 .execute(conn)?;
-            entry.quantity += 1
-        } else {
+            entry.quantity += 1;
+            return Ok(());
+        };
+        conn.transaction(|conn| {
             let (pid, order_idx) = t_product_variants::table
                 .find(variant_id)
                 .select((t_product_variants::pid, t_product_variants::order_idx))
@@ -138,9 +140,9 @@ impl CartDomain {
                 product: ProductDomain::query(pid, conn)?.into_product(),
                 quantity: 1,
                 variants: order_idx,
-            })
-        }
-        Ok(())
+            });
+            Ok(())
+        })
     }
 
     pub(in crate::domain) fn remove_item(
