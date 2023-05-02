@@ -4,7 +4,7 @@ use bigdecimal::BigDecimal;
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::iter::Sum;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign};
 use std::str::FromStr;
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
@@ -30,6 +30,17 @@ impl FromStr for CurrencyCode {
 pub struct Money {
     pub amount: BigDecimal,
     pub currency_code: CurrencyCode,
+}
+
+impl TryFrom<volo_gen::common::v1::Money> for Money {
+    type Error = Status;
+
+    fn try_from(value: volo_gen::common::v1::Money) -> std::result::Result<Self, Self::Error> {
+        Ok(Self {
+            amount: BigDecimal::from(value.amount).div(100),
+            currency_code: value.currency_code.parse()?,
+        })
+    }
 }
 
 impl PartialEq<Self> for Money {

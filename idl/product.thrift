@@ -28,6 +28,6 @@ struct ProductConnection {
 
 service ProductService {
     void ping();  // used for health check
-    Product getProductById(1: i64 id);
+    Product getProduct(1: i64 id);
     ProductConnection listProducts(1: common.PaginationOption params);
 }

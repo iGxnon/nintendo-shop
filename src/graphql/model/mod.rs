@@ -1,8 +1,10 @@
 mod cart;
+mod checkout;
 mod common;
 mod product;
 
 use crate::graphql::model::cart::{Cart, MutationCart};
+use crate::graphql::model::checkout::{Checkout, MutationCheckout, Payment, Shipping};
 use crate::graphql::model::product::Product;
 use crate::graphql::Resolver;
 use crate::infra::error::{Code, Status};
@@ -10,6 +12,7 @@ use crate::infra::id::Id;
 use crate::infra::mqsrs::*;
 use async_graphql::connection::{query, Connection, Edge};
 use async_graphql::*;
+use volo_gen::checkout::v1::PutCheckout;
 use volo_gen::common::v1::PaginationOption;
 
 pub struct GraphqlQuery;
@@ -84,6 +87,34 @@ impl GraphqlQuery {
         let res = query.execute(id.raw()).await;
         map_not_found!(res)
     }
+
+    async fn checkout<'ctx>(&self, cx: &Context<'ctx>, id: String) -> Result<Option<Checkout>> {
+        let id: Id<Checkout> = id.parse()?;
+        let resolver = cx.data::<Resolver>()?;
+        let query = resolver.create_get_checkout();
+        let res = query.execute(id.raw()).await;
+        map_not_found!(res)
+    }
+
+    async fn checkout_by_cart_id<'ctx>(
+        &self,
+        cx: &Context<'ctx>,
+        id: String,
+    ) -> Result<Option<Checkout>> {
+        let cart_id: Id<Cart> = id.parse()?;
+        let resolver = cx.data::<Resolver>()?;
+        let query = resolver.create_get_checkout_by_cart_id();
+        let res = query.execute(cart_id.raw()).await;
+        map_not_found!(res)
+    }
+
+    async fn shipping_methods<'ctx>(&self) -> Result<Vec<Shipping>> {
+        todo!()
+    }
+
+    async fn payment_methods<'ctx>(&self) -> Result<Vec<Payment>> {
+        todo!()
+    }
 }
 
 #[Object]
@@ -126,6 +157,63 @@ impl GraphqlMutation {
         let cart = mutate.execute((cart_id.raw(), entry_id.raw())).await?;
         Ok(MutationCart {
             cart: cart.try_into()?,
+        })
+    }
+
+    async fn create_checkout<'ctx>(
+        &self,
+        cx: &Context<'ctx>,
+        cart_id: String,
+    ) -> Result<MutationCheckout> {
+        let cart_id: Id<Cart> = cart_id.parse()?;
+        let resolver = cx.data::<Resolver>()?;
+        let mutate = resolver.create_create_checkout();
+        let checkout = mutate.execute(cart_id.raw()).await?;
+        Ok(MutationCheckout {
+            checkout: checkout.try_into()?,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    async fn submit_information<'ctx>(
+        &self,
+        cx: &Context<'ctx>,
+        id: String,
+        shipping_id: Option<String>,
+        payment_id: Option<String>,
+        email: Option<String>,
+        name: Option<String>,
+        address: Option<String>,
+        phone: Option<String>,
+    ) -> Result<MutationCheckout> {
+        let id: Id<Checkout> = id.parse()?;
+        let sid: Option<Id<Shipping>> = if let Some(sid) = shipping_id {
+            Some(sid.parse()?)
+        } else {
+            None
+        };
+        let pid: Option<Id<Shipping>> = if let Some(pid) = payment_id {
+            Some(pid.parse()?)
+        } else {
+            None
+        };
+        let resolver = cx.data::<Resolver>()?;
+        let mutate = resolver.create_submit_information();
+        let checkout = mutate
+            .execute((
+                id.raw(),
+                PutCheckout {
+                    shipping_id: sid.map(|v| v.raw()),
+                    payment_id: pid.map(|v| v.raw()),
+                    contact_email: email.map(Into::into),
+                    receiver_name: name.map(Into::into),
+                    receiver_address: address.map(Into::into),
+                    receiver_phone: phone.map(Into::into),
+                },
+            ))
+            .await?;
+        Ok(MutationCheckout {
+            checkout: checkout.try_into()?,
         })
     }
 }

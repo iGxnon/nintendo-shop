@@ -7,3 +7,5 @@ entries:
       path: ../idl/product.thrift
     - source: local
       path: ../idl/cart.thrift
+    - source: local
+      path: ../idl/checkout.thrift

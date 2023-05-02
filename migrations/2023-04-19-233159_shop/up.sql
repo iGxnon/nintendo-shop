@@ -131,3 +131,72 @@ comment on column t_cart_entries.quantity is 'the quantity of this item';
 
 comment on column t_cart_entries.variant is 'the index of variants selected in product';
 
+create table t_checkouts
+(
+    id           bigserial               not null
+        constraint t_checkouts_pk
+            primary key,
+    cid          bigint                  not null unique
+        constraint t_checkouts_t_carts_id_fk
+            references t_carts,
+    status       integer   default 0     not null,
+    sid          bigint,
+    pid          bigint,
+    shipping_fee money,
+    email        varchar,
+    full_name    varchar,
+    address      varchar,
+    phone        varchar,
+    created_at   timestamp default now() not null,
+    updated_at   timestamp default now() not null
+);
+
+comment on table t_checkouts is 'order table';
+
+comment on column t_checkouts.id is 'pk';
+
+comment on column t_checkouts.cid is 'fk of cart id';
+
+comment on column t_checkouts.status is 'status of this order, waiting(0), paid(1), expired(2), ...';
+
+comment on column t_checkouts.sid is 'fk of shipping id, optional';
+
+comment on column t_checkouts.pid is 'fk of payment id, optional';
+
+comment on column t_checkouts.shipping_fee is 'calculated shipping fee, optional';
+
+comment on column t_checkouts.email is 'contact email, optional';
+
+comment on column t_checkouts.full_name is 'receiver full name, required when checkout';
+
+comment on column t_checkouts.address is 'receiver address, required when checkout';
+
+comment on column t_checkouts.phone is 'receiver phone, required when checkout';
+
+create table t_shipping_methods
+(
+    id     bigserial not null
+        constraint t_shipping_methods_pk
+            primary key,
+    vendor varchar   not null
+);
+
+comment on table t_shipping_methods is 'shipping method table';
+
+comment on column t_shipping_methods.id is 'pk';
+
+comment on column t_shipping_methods.vendor is 'vendor name';
+
+create table t_payment_methods
+(
+    id     bigserial not null
+        constraint t_payment_methods_pk
+            primary key,
+    vendor varchar   not null
+);
+
+comment on table t_payment_methods is 'payment method table';
+
+comment on column t_payment_methods.id is 'pk';
+
+comment on column t_payment_methods.vendor is 'vendor name';

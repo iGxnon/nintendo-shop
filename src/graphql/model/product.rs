@@ -3,7 +3,6 @@ use crate::infra::error::Status;
 use crate::infra::id::Id;
 use async_graphql::*;
 use bigdecimal::BigDecimal;
-use std::ops::Div;
 
 #[derive(Clone)]
 pub struct ProductVariant {
@@ -144,10 +143,7 @@ impl TryFrom<volo_gen::product::v1::Product> for Product {
                 .map(|v| {
                     Ok(ProductVariant {
                         id: v.id.into(),
-                        price: Money {
-                            amount: BigDecimal::from(v.price.amount).div(100), // todo compat with currency_code
-                            currency_code: v.price.currency_code.parse()?,
-                        },
+                        price: v.price.try_into()?,
                         title: v.title.into_string(),
                         inventory_count: v.inventory_count,
                         order_idx: v.order_idx,

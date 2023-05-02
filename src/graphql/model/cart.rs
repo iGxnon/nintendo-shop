@@ -40,7 +40,7 @@ impl Cart {
 }
 
 impl CartEntry {
-    fn calculate_amount(&self) -> Money {
+    pub(crate) fn calculate_amount(&self) -> Money {
         if self.product.variants.is_empty() {
             return Money {
                 amount: BigDecimal::from(0),
