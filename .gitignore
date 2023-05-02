@@ -5,3 +5,5 @@
 venv
 images
 __pycache__
+config/*
+!config/templates
