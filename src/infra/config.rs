@@ -15,28 +15,6 @@ pub mod service {
     use crate::infra::config::ConfigType;
     use serde::{Deserialize, Serialize};
     use std::time::Duration;
-    //
-    // pub trait ArchitectureConfig {
-    //     type Monolith: ConfigType; // monolith architecture
-    //     type Micro: ConfigType; // micro-services architecture
-    //     type Hybrid: ConfigType; // hybrid architecture
-    // }
-    //
-    // #[derive(Serialize, Deserialize, Debug)]
-    // #[serde(tag = "type")]
-    // pub enum MonolithConfig {
-    //     Rest,
-    //     Graphql,
-    // }
-    //
-    // #[derive(Serialize, Deserialize, Debug)]
-    // #[serde(tag = "type")]
-    // pub enum MicroConfig {
-    //     RestGrpc,
-    //     RestThrift,
-    //     GraphqlGrpc,
-    //     GraphqlThrift,
-    // }
 
     pub trait ServiceConfig {
         /// back-end protocol

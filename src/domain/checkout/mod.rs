@@ -11,7 +11,7 @@ use volo_gen::checkout::v1::Checkout;
 pub mod graphql {
     use super::*;
     use crate::graphql::Resolver;
-    use volo_gen::checkout::v1::PutCheckout;
+    use volo_gen::checkout::v1::{Payment, PutCheckout, Shipping};
 
     impl Resolver {
         pub fn create_get_checkout(&self) -> impl Query<i64, Result<Checkout>> + '_ {
@@ -24,6 +24,18 @@ pub mod graphql {
             use crate::domain::checkout::query::get_checkout_by_cart_id::execute;
 
             move |cid: i64| async move { execute(cid, self.pg_conn()?.deref_mut()) }
+        }
+
+        pub fn create_list_shipping(&self) -> impl Query<(), Result<Vec<Shipping>>> + '_ {
+            use crate::domain::checkout::query::list_shipping::execute;
+
+            move |_: ()| async move { execute(self.pg_conn()?.deref_mut()) }
+        }
+
+        pub fn create_list_payment(&self) -> impl Query<(), Result<Vec<Payment>>> + '_ {
+            use crate::domain::checkout::query::list_payments::execute;
+
+            move |_: ()| async move { execute(self.pg_conn()?.deref_mut()) }
         }
 
         pub fn create_create_checkout(&self) -> impl Mutation<i64, Result<Checkout>> + '_ {

@@ -64,8 +64,10 @@ pub struct Checkout {
     pub payment: Option<Payment>,
     pub shipping_fee: Option<Money>,
     pub contact_email: Option<String>,
+    pub receiver_country_code: Option<String>,
     pub receiver_name: Option<String>,
     pub receiver_address: Option<String>,
+    pub receiver_postcode: Option<String>,
     pub receiver_phone: Option<String>,
 }
 
@@ -90,8 +92,10 @@ impl TryFrom<volo_gen::checkout::v1::Checkout> for Checkout {
                 None
             },
             contact_email: value.contact_email.map(Into::into),
+            receiver_country_code: value.receiver_country_code.map(Into::into),
             receiver_name: value.receiver_name.map(Into::into),
             receiver_address: value.receiver_address.map(Into::into),
+            receiver_postcode: value.receiver_postcode.map(Into::into),
             receiver_phone: value.receiver_phone.map(Into::into),
         })
     }
@@ -149,15 +153,23 @@ impl Checkout {
         self.contact_email.as_ref()
     }
 
-    async fn receiver_name(&self) -> Option<&String> {
+    async fn country_code(&self) -> Option<&String> {
+        self.receiver_country_code.as_ref()
+    }
+
+    async fn name(&self) -> Option<&String> {
         self.receiver_name.as_ref()
     }
 
-    async fn receiver_address(&self) -> Option<&String> {
+    async fn address(&self) -> Option<&String> {
         self.receiver_address.as_ref()
     }
 
-    async fn receiver_phone(&self) -> Option<&String> {
+    async fn postcode(&self) -> Option<&String> {
+        self.receiver_postcode.as_ref()
+    }
+
+    async fn phone(&self) -> Option<&String> {
         self.receiver_phone.as_ref()
     }
 

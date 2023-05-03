@@ -108,12 +108,18 @@ impl GraphqlQuery {
         map_not_found!(res)
     }
 
-    async fn shipping_methods<'ctx>(&self) -> Result<Vec<Shipping>> {
-        todo!()
+    async fn shipping_methods<'ctx>(&self, cx: &Context<'ctx>) -> Result<Vec<Shipping>> {
+        let resolver = cx.data::<Resolver>()?;
+        let list = resolver.create_list_shipping();
+        let res = list.execute(()).await?;
+        Ok(res.into_iter().map(Into::into).collect())
     }
 
-    async fn payment_methods<'ctx>(&self) -> Result<Vec<Payment>> {
-        todo!()
+    async fn payment_methods<'ctx>(&self, cx: &Context<'ctx>) -> Result<Vec<Payment>> {
+        let resolver = cx.data::<Resolver>()?;
+        let list = resolver.create_list_payment();
+        let res = list.execute(()).await?;
+        Ok(res.into_iter().map(Into::into).collect())
     }
 }
 
@@ -183,7 +189,9 @@ impl GraphqlMutation {
         payment_id: Option<String>,
         email: Option<String>,
         name: Option<String>,
+        country_code: Option<String>,
         address: Option<String>,
+        postcode: Option<String>,
         phone: Option<String>,
     ) -> Result<MutationCheckout> {
         let id: Id<Checkout> = id.parse()?;
@@ -207,7 +215,9 @@ impl GraphqlMutation {
                     payment_id: pid.map(|v| v.raw()),
                     contact_email: email.map(Into::into),
                     receiver_name: name.map(Into::into),
+                    receiver_country_code: country_code.map(Into::into),
                     receiver_address: address.map(Into::into),
+                    receiver_postcode: postcode.map(Into::into),
                     receiver_phone: phone.map(Into::into),
                 },
             ))

@@ -26,8 +26,10 @@ struct Checkout {
     6: optional common.Money shipping_fee;
     7: optional string contact_email;
     8: optional string receiver_name;
-    9: optional string receiver_address;
-    10: optional string receiver_phone;
+    9: optional string receiver_country_code;
+    10: optional string receiver_address;
+    11: optional string receiver_postcode;
+    12: optional string receiver_phone;
 }
 
 struct PutCheckout {
@@ -35,8 +37,10 @@ struct PutCheckout {
     2: optional i64 payment_id;
     3: optional string contact_email;
     4: optional string receiver_name;
-    5: optional string receiver_address;
-    6: optional string receiver_phone;
+    5: optional string receiver_country_code;
+    6: optional string receiver_address;
+    7: optional string receiver_postcode;
+    8: optional string receiver_phone;
 }
 
 service CheckoutService {

@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Error as AnyError};
 use http::StatusCode;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize, Serializer};
 use std::any::TypeId;
 use std::backtrace::Backtrace;
 use std::collections::HashMap;
@@ -13,12 +14,11 @@ pub type Result<T, E = Status> = std::result::Result<T, E>;
 
 /// From https://github.com/googleapis/googleapis/blob/master/google/rpc/error_details.proto
 /// Design for error status compatibility
-#[derive(Clone, Serialize)]
+#[derive(Clone)]
 pub struct Status {
     code: Code,
     message: String,
     details: Option<Vec<ErrorDetail>>,
-    #[serde(skip)]
     inner: Option<Arc<AnyError>>,
 }
 
@@ -467,15 +467,42 @@ impl Debug for Status {
     }
 }
 
+#[inline]
+fn filter_details(details: &[ErrorDetail]) -> Vec<&ErrorDetail> {
+    details
+        .iter()
+        .filter(|detail| !detail.is_sensitive())
+        .collect::<Vec<_>>()
+}
+
 impl Display for Status {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // filter sensitive details when display status
+        let safe_details = self.details.as_deref().map(filter_details);
         write!(
             f,
-            "error: {}, message: {}, details: {}",
+            "code: {}, description: {}, message: {}, details: {}",
+            self.code.to_http_code().as_u16(),
             self.code,
             self.message,
-            serde_json::to_string(&self.details).map_err(|_| std::fmt::Error)?,
+            serde_json::to_string(&safe_details).map_err(|_| std::fmt::Error)?,
         )
+    }
+}
+
+impl Serialize for Status {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Status", 4)?;
+        s.serialize_field("code", &self.code.to_http_code().as_u16())?;
+        s.serialize_field("description", self.code.description())?;
+        s.serialize_field("message", &self.message)?;
+        // filter sensitive details when display status
+        let safe_details = self.details.as_deref().map(filter_details);
+        s.serialize_field("details", &safe_details)?;
+        s.end()
     }
 }
 

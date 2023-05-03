@@ -145,7 +145,9 @@ create table t_checkouts
     shipping_fee money,
     email        varchar,
     full_name    varchar,
+    country_code varchar,
     address      varchar,
+    postcode     varchar,
     phone        varchar,
     created_at   timestamp default now() not null,
     updated_at   timestamp default now() not null
@@ -169,7 +171,11 @@ comment on column t_checkouts.email is 'contact email, optional';
 
 comment on column t_checkouts.full_name is 'receiver full name, required when checkout';
 
+comment on column t_checkouts.country_code is 'receiver country code, required when checkout';
+
 comment on column t_checkouts.address is 'receiver address, required when checkout';
+
+comment on column t_checkouts.postcode is 'receiver post code, required when checkout';
 
 comment on column t_checkouts.phone is 'receiver phone, required when checkout';
 
