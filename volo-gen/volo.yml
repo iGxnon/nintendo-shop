@@ -3,9 +3,9 @@ entries:
     protocol: thrift
     filename: volo_gen.rs
     idls:
-    - source: local
-      path: ../idl/product.thrift
-    - source: local
-      path: ../idl/cart.thrift
-    - source: local
-      path: ../idl/checkout.thrift
+      - source: local
+        path: ../idl/product.thrift
+      - source: local
+        path: ../idl/cart.thrift
+      - source: local
+        path: ../idl/checkout.thrift

@@ -1,14 +1,3 @@
 listen_addr = '[ip]:[port]'
 redis = 'redis://[host]/[database]'
 pgsql = 'postgres://[username]:[password]@[host]/[database]'
-
-# Whether to enable the monolith service
-[monolith]
-enable = true
-pgsql = 'postgres://[username]:[password]@[host]/[database]'
-redis = 'redis://[host]/[database]'
-
-# Whether to enable the micro service
-[micro]
-enable = false
-rpc = "[ip]:[port]"

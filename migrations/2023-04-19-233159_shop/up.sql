@@ -1,5 +1,5 @@
 -- Your SQL goes here
-create table t_products
+create table if not exists t_products
 (
     id            bigserial               not null
         constraint t_products_pk
@@ -24,7 +24,7 @@ comment on column t_products.description is 'description of this product';
 
 comment on column t_products.currency_code is 'the currency code used in this product';
 
-create table t_product_variants
+create table if not exists t_product_variants
 (
     id              bigserial               not null
         constraint t_product_variants_pk
@@ -56,7 +56,7 @@ comment on column t_product_variants.inventory_count is 'inventory count';
 
 comment on column t_product_variants.order_idx is 'the index in variants of a product';
 
-create table t_product_images
+create table if not exists t_product_images
 (
     id         bigserial               not null
         constraint t_product_images_pk
@@ -85,7 +85,7 @@ comment on column t_product_images.alt_text is 'altText of image';
 
 comment on column t_product_images.order_idx is 'the index in images of a product, 0 is the feature image';
 
-create table t_carts
+create table if not exists t_carts
 (
     id         bigserial               not null
         constraint t_carts_pk
@@ -98,7 +98,7 @@ comment on table t_carts is 'a cart for a client';
 
 comment on column t_carts.id is 'pk';
 
-create table t_cart_entries
+create table if not exists t_cart_entries
 (
     id         bigserial               not null
         constraint t_cart_entries_pk
@@ -131,7 +131,7 @@ comment on column t_cart_entries.quantity is 'the quantity of this item';
 
 comment on column t_cart_entries.variant is 'the index of variants selected in product';
 
-create table t_checkouts
+create table if not exists t_checkouts
 (
     id           bigserial               not null
         constraint t_checkouts_pk
@@ -179,7 +179,7 @@ comment on column t_checkouts.postcode is 'receiver post code, required when che
 
 comment on column t_checkouts.phone is 'receiver phone, required when checkout';
 
-create table t_shipping_methods
+create table if not exists t_shipping_methods
 (
     id     bigserial not null
         constraint t_shipping_methods_pk
@@ -193,7 +193,7 @@ comment on column t_shipping_methods.id is 'pk';
 
 comment on column t_shipping_methods.vendor is 'vendor name';
 
-create table t_payment_methods
+create table if not exists t_payment_methods
 (
     id     bigserial not null
         constraint t_payment_methods_pk
