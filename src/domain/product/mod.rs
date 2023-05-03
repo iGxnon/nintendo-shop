@@ -4,7 +4,6 @@ pub mod query;
 
 use crate::infra::error::*;
 use crate::infra::mqsrs::Query;
-use async_trait::async_trait;
 use std::ops::DerefMut;
 use volo_gen::common::v1::PaginationOption;
 use volo_gen::product::v1::Product;

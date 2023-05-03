@@ -2,12 +2,12 @@ use crate::infra::error::Status;
 use async_graphql::*;
 use bigdecimal::BigDecimal;
 use std::cmp::Ordering;
-use std::fmt::{Display, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign};
 use std::str::FromStr;
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum CurrencyCode {
     USD,
     CNY,

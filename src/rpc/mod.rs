@@ -17,5 +17,5 @@ impl BaseResolver for Resolver {
 }
 
 impl NamedResolver for Resolver {
-    const UID: &'static str = "product-thrift";
+    const SID: &'static str = "product-thrift";
 }

@@ -66,6 +66,6 @@ pub trait BaseResolver {
 }
 
 pub trait NamedResolver: BaseResolver {
-    // The unique id in the whole system
-    const UID: &'static str;
+    // The service id in the whole system
+    const SID: &'static str;
 }

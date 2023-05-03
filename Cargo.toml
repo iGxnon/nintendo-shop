@@ -27,3 +27,10 @@ tracing = "*"
 url = "*"
 volo = "*"
 volo-gen = { path = "./volo-gen" }
+
+[profile.release]
+lto = true
+opt-level = 3
+debug = false
+strip = true
+debug-assertions = false

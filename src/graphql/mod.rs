@@ -23,6 +23,7 @@ pub struct Config {
     listen_addr: String,
     pgsql: String,
     redis: String,
+    deployment_id: String,
 }
 
 impl Default for Config {
@@ -31,6 +32,7 @@ impl Default for Config {
             listen_addr: "0.0.0.0:3000".to_string(),
             pgsql: "postgres://postgres:postgres@localhost/shop".to_string(),
             redis: "redis://redis/".to_string(),
+            deployment_id: "undefined".to_string(),
         }
     }
 }
@@ -47,7 +49,7 @@ impl BaseResolver for Resolver {
 }
 
 impl NamedResolver for Resolver {
-    const UID: &'static str = "sys-graphql";
+    const SID: &'static str = "sys-graphql";
 }
 
 static CONFIG: OnceCell<Config> = OnceCell::new();
@@ -68,7 +70,9 @@ impl Resolver {
             settings.try_deserialize().unwrap()
         });
         println!(
-            "{}",
+            "Service `{}` is starting...\nDeployment ID: {}\nConfiguration:\n{}",
+            Self::SID,
+            CONFIG.get().unwrap().deployment_id,
             serde_json::to_string_pretty(CONFIG.get().unwrap()).unwrap()
         );
         Self {
