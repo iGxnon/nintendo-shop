@@ -15,6 +15,7 @@ use poem::middleware::Cors;
 use poem::{get, EndpointExt, Route, Server};
 use r2d2::{Pool, PooledConnection};
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize)]
@@ -23,7 +24,6 @@ pub struct Config {
     listen_addr: String,
     pgsql: String,
     redis: String,
-    deployment_id: String,
 }
 
 impl Default for Config {
@@ -32,7 +32,6 @@ impl Default for Config {
             listen_addr: "0.0.0.0:3000".to_string(),
             pgsql: "postgres://postgres:postgres@localhost/shop".to_string(),
             redis: "redis://redis/".to_string(),
-            deployment_id: "undefined".to_string(),
         }
     }
 }
@@ -59,12 +58,7 @@ impl Resolver {
         CONFIG.get_or_init(|| {
             let settings = config::Config::builder()
                 .add_source(File::from(conf.as_ref()))
-                .add_source(
-                    Environment::with_prefix("APP")
-                        .try_parsing(true)
-                        .separator("_")
-                        .list_separator(" "),
-                )
+                .add_source(Environment::with_prefix("APP"))
                 .build()
                 .unwrap();
             settings.try_deserialize().unwrap()
@@ -72,7 +66,7 @@ impl Resolver {
         println!(
             "Service `{}` is starting...\nDeployment ID: {}\nConfiguration:\n{}",
             Self::SID,
-            CONFIG.get().unwrap().deployment_id,
+            env::var("APP_DEPLOYMENT_ID").unwrap_or("undefined".to_string()),
             serde_json::to_string_pretty(CONFIG.get().unwrap()).unwrap()
         );
         Self {
